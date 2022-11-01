@@ -43,7 +43,7 @@ int sloop = 0;			/* number of loops */
 char *sdisp = NULL;		/* X display to connect to */
 Atom sseln = XA_PRIMARY;	/* X selection to work with */
 Atom target = XA_STRING;
-int wait = 0;              /* wait: stop xclip after wait msec
+int wait_int = 0;              /* wait_int: stop xclip after wait_int msec
                             after last 'paste event', start counting
                             after first 'paste event' */
 
@@ -250,19 +250,19 @@ doOptMain(int argc, char *argv[])
     /* check for -sensitive */
     if (XrmGetResource(opt_db, "xclip.sensitive", "Xclip.Sensitive", &rec_typ, &rec_val)
 	) {
-	wait = 50;
+	wait_int = 50;
 	fsecm = T;
 	if (xcverb >= OVERBOSE) {
-	    fprintf(stderr, "Sensitive Mode Implies -wait 1\n");
+	    fprintf(stderr, "Sensitive Mode Implies -wait_int 1\n");
 	    fprintf(stderr, "Sensitive Buffers Will Be Zeroed At Exit\n");
         }
     }
 
-    if (XrmGetResource(opt_db, "xclip.wait", "Xclip.Wait", &rec_typ, &rec_val)
+    if (XrmGetResource(opt_db, "xclip.wait_int", "Xclip.Wait", &rec_typ, &rec_val)
         ) {
-	wait = atoi(rec_val.addr);
+	wait_int = atoi(rec_val.addr);
 	if (xcverb >= OVERBOSE)
-	    fprintf(stderr, "wait: %i msec\n", wait);
+	    fprintf(stderr, "wait_int: %i msec\n", wait_int);
     }
 
     /* Read remaining options (filenames) */
@@ -493,7 +493,7 @@ doIn(Window win, const char *progname)
     /* Jump into the middle of two while loops */
     goto start;
 
-    /* loop and wait for the expected number of
+    /* loop and wait_int for the expected number of
      * SelectionRequest events
      */
     while (dloop < sloop || sloop < 1) {
@@ -514,15 +514,15 @@ doIn(Window win, const char *progname)
 		fprintf(stderr, "  Waiting for selection request number %i\n", dloop + 1);
 	}
 
-	/* wait for a SelectionRequest (paste) event */
+	/* wait_int for a SelectionRequest (paste) event */
 	while (1) {
 	    struct requestor *requestor;
 	    Window requestor_id;
 	    int finished;
 
-	    if (!XPending(dpy) && wait > 0) {
-		tv.tv_sec = wait/1000;
-		tv.tv_usec = (wait%1000)*1000;
+	    if (!XPending(dpy) && wait_int > 0) {
+		tv.tv_sec = wait_int/1000;
+		tv.tv_usec = (wait_int%1000)*1000;
 
 		/* build fd_set */
 		FD_ZERO(&in_fds);
@@ -922,9 +922,9 @@ main(int argc, char *argv[])
     opt_tab[i].value = (XPointer) xcstrdup("s");
     i++;
 
-    /* wait option entry */
-    opt_tab[i].option = xcstrdup("-wait");
-    opt_tab[i].specifier = xcstrdup(".wait");
+    /* wait_int option entry */
+    opt_tab[i].option = xcstrdup("-wait_int");
+    opt_tab[i].specifier = xcstrdup(".wait_int");
     opt_tab[i].argKind = XrmoptionSepArg;
     opt_tab[i].value = (XPointer) NULL;
     i++;
